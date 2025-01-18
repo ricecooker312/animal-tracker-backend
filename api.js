@@ -1,14 +1,24 @@
 // set up express
 const express = require("express");
 const app = express();
-app.use(express.json())
+app.use(express.json());
 
 const pool = require("./dbcon.js");
 
 const port = 8000;
 
-app.get('/api/get-all', (req, res) => {
+app.get('/api/get/all', (req, res) => {
     pool.query("SELECT * FROM animals", (err, results) => {
+        if (err) throw err;
+
+        return res.status(200).send(results.rows);
+    })
+})
+
+app.get('/api/get/:animalId', (req, res) => {
+    const animalId = parseInt(req.params.animalId);
+
+    pool.query("SELECT * FROM animals WHERE id = $1", [animalId], (err, results) => {
         if (err) throw err;
 
         return res.status(200).send(results.rows);
@@ -34,7 +44,45 @@ app.post('/api/add-animal', (req, res) => {
     })  
 })
 
+app.patch('/api/:animalId/update', async (req, res) => {
+    const animalId = req.params.animalId;
+    const updates = req.body;
+  
+    if (!updates || Object.keys(updates).length === 0) {
+      return res.status(400).json({ error: 'No fields to update provided' });
+    }
+  
+    try {
+      const setClause = Object.keys(updates)
+        .map((field, index) => `"${field}" = $${index + 1}`)
+        .join(', ');
+  
+      const values = Object.values(updates);
+      const query = `UPDATE animals SET ${setClause} WHERE id = $${values.length + 1} RETURNING *`;
+      const result = await pool.query(query, [...values, animalId]);
 
+      if (result.rowCount === 0) {
+        return res.status(404).json({ error: 'Record not found' });
+      }
+  
+      res.status(200).json({ success: true, data: result.rows[0] });
+    } catch (error) {
+      console.error('Error updating record:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+app.delete('/api/:animalId/found', (req, res) => {
+    const animalId = parseInt(req.params.animalId);
+
+    pool.query('DELETE FROM animals WHERE id = $1', [animalId], (err, results) => {
+       if (err) throw err
+
+        return res.status(200).send({
+            'message': 'Animal has been found!'
+        })
+    })
+})
 
 app.listen(port, (err) => {
     if (err) console.log(`Error: ${err}`);
