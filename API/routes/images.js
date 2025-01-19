@@ -1,8 +1,8 @@
 const express = require("express");
-const pg = require('../dbcon');
+const pg = require('../../dbcon');
 const fs = require("fs");
 const path = require("path");
-const pool = require("../dbcon");
+const pool = require("../../dbcon");
 
 const multer = require("multer");
 
