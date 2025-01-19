@@ -8,7 +8,7 @@ const imageRoutes = require("./API/routes/images");
 const cors = require('cors');
 
 // Initialize environment variables
-dotenv.config({ path: './huh.env' });
+dotenv.config();
 
 // Initialize Express app
 const app = express();
