@@ -1,11 +1,13 @@
-//Authentication process(Register and Log in)
+// Authentication Process (Register and Log in)
+require('dotenv').config();
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-require('dotenv').config();
-const { findUserByUsername, addUser } = require('../models/user');
+const { findUserByUsername, addUser } = require('../models/user'); // Placeholder functions for user management
 const router = express.Router();
-const JWT_SECRET = process.env.JWT_SECRET;
+
+const JWT_SECRET = process.env.JWT_SECRET; // Load secret key from .env file
+console.log('JWT_SECRET:', process.env.JWT_SECRET);
 
 // Register Route
 router.post('/register', async (req, res) => {
@@ -15,13 +17,13 @@ router.post('/register', async (req, res) => {
     return res.status(400).json({ message: 'Username and password are required' });
   }
 
-  const existingUser = findUserByUsername(username);
+  const existingUser = await findUserByUsername(username); // Assume async function
   if (existingUser) {
     return res.status(400).json({ message: 'User already exists' });
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
-  addUser({ username, password: hashedPassword });
+  await addUser({ username, password: hashedPassword });
   res.status(201).json({ message: 'User registered successfully' });
 });
 
@@ -29,7 +31,7 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
   const { username, password } = req.body;
 
-  const user = findUserByUsername(username);
+  const user = await findUserByUsername(username); // Assume async function
   if (!user) {
     return res.status(400).json({ message: 'Invalid credentials' });
   }
@@ -39,7 +41,7 @@ router.post('/login', async (req, res) => {
     return res.status(400).json({ message: 'Invalid credentials' });
   }
 
-  const token = jwt.sign({ username }, JWT_SECRET, { expiresIn: '1h' });
+  const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '1h' });
   res.json({ message: 'Login successful', token });
 });
 
