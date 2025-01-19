@@ -1,6 +1,6 @@
 // set up express
 const express = require("express");
-const pool = require("../dbcon.js");
+const pool = require("../../dbcon.js");
 
 const animals = express.Router();
 
