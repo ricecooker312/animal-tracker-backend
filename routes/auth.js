@@ -7,7 +7,6 @@ const { findUserByUsername, addUser } = require('../models/user'); // Placeholde
 const router = express.Router();
 
 const JWT_SECRET = process.env.JWT_SECRET; // Load secret key from .env file
-console.log('JWT_SECRET:', process.env.JWT_SECRET);
 
 // Register Route
 router.post('/register', async (req, res) => {
